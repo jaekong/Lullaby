@@ -31,8 +31,8 @@ let package = Package(
                 .product(name: "SoundIO", package: "SoundIO"),
                 .product(name: "Collections", package: "swift-collections"),
                 .target(name: "LullabyMusic")
-            ],
-            linkerSettings: [.unsafeFlags(["-L/usr/local/lib"])]
+            ]
+//            linkerSettings: [.unsafeFlags(["-L/usr/local/lib"])]
         ),
         .target(
             name: "LullabyMusic"
