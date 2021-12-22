@@ -17,7 +17,7 @@ public extension Amplitude {
 
 public typealias Time = Precision
 
-extension Task where Success == Never, Failure == Never{
+public extension Task where Success == Never, Failure == Never{
     static func sleep(seconds: Double) async {
         let nanoseconds = UInt64(seconds * 1_000_000_000)
         await Self.sleep(nanoseconds)
@@ -25,16 +25,16 @@ extension Task where Success == Never, Failure == Never{
 }
 
 public actor Value {
-    init(value: Sample) {
+    public init(value: Sample) {
         self.value = value
     }
     
-    func setValue(_ value: Sample) {
+    public func setValue(_ value: Sample) {
         self.value = value
     }
     
-    var value: Sample
-    var output: Signal {
+    public var value: Sample
+    public var output: Signal {
         return Signal { _ in
             return self.value
         }

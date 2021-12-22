@@ -60,7 +60,7 @@ public actor LBEngine {
         print("Current Device:", device.name)
         
         out = try OutStream(to: device)
-        out.format = .float32bitLittleEndian
+        out.format = .signed16bitLittleEndian
     }
     
     public func start() async throws {
@@ -89,7 +89,7 @@ public actor LBEngine {
                         let sample = self._output(time)
                         
                         for area in areas!.iterate(over: layout.channelCount) {
-                            area.write(sample, stepBy: frame)
+                            area.write(Int16(sample * Float(Int16.max)), stepBy: frame)
                         }
                     }
                     secondsOffset = (secondsOffset + secondsPerFrame * Float(frameCount))
