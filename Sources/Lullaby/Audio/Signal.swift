@@ -25,7 +25,7 @@ extension Signal: ExpressibleByIntegerLiteral {
     }
 }
 
-extension Signal {
+public extension Signal {
     static func +(lhs: Signal, rhs: Signal) -> Signal {
         return Signal { time in lhs(time) + rhs(time) }
     }
@@ -42,7 +42,7 @@ extension Signal {
     }
 }
 
-extension Signal {
+public extension Signal {
     static public func constant(_ value: Sample) -> Signal {
         return Signal { _ in value }
     }
