@@ -25,7 +25,11 @@ public actor LBEngine {
         #if os(macOS)
         try io.connect(to: Backend.coreAudio)
         #else
-        try io.connect()
+        do {
+            try io.connect(to: Backend.jack)
+        } catch {
+            try io.connect()
+        }
         #endif
         
         io.flushEvents()
@@ -50,10 +54,10 @@ public actor LBEngine {
     }
     
     public func prepare() throws {
-        print(try self.io.outputDeviceCount())
+        print("Device Count:", try self.io.outputDeviceCount())
         device = try self.io.getOutputDevice(at: io.defaultOutputDeviceIndex())
         
-        print(device.name)
+        print("Current Device:", device.name)
         
         out = try OutStream(to: device)
         out.format = .float32bitLittleEndian
