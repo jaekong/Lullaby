@@ -1,0 +1,18 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Install libsoundio
+      run: brew install libsoundio
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      run: swift build
