@@ -46,7 +46,7 @@ public actor LBEngine {
             }
             
             eventLoop = Task.detached {
-                while true {
+                while !Task.isCancelled {
                     self.io.waitEvents()
                 }
             }
@@ -77,7 +77,6 @@ public actor LBEngine {
     public func start() async throws {
         audioTask = Task(priority: .high) {
             var secondsOffset: Float = 0
-            
             
             out.underflowCallback { outstream in
                 print("Underflow Occured")
@@ -132,6 +131,15 @@ public actor LBEngine {
     
     public func stop() {
         audioTask?.cancel()
+        eventLoop?.cancel()
+        
+        try! out.withInternalPointer { pointer in
+            soundio_outstream_destroy(pointer)
+        }
+        
+        try! io.withInternalPointer { pointer in
+            soundio_disconnect(pointer)
+        }
     }
     
     static public func playTest(of signal: Signal = sine(frequency: 440.0), for seconds: Double = 1) async throws {
