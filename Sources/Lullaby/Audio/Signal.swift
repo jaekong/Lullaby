@@ -43,15 +43,15 @@ public extension Signal {
 }
 
 public extension Signal {
-    static public func constant(_ value: Sample) -> Signal {
+    static func constant(_ value: Sample) -> Signal {
         return Signal { _ in value }
     }
     
-    static public func constant(_ value: Int) -> Signal {
+    static func constant(_ value: Int) -> Signal {
         return Signal { _ in Sample(value) }
     }
     
-    static public func constant(_ value: Double) -> Signal {
+    static func constant(_ value: Double) -> Signal {
         return Signal { _ in Sample(value) }
     }
 }
