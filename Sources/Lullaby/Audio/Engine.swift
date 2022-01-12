@@ -20,29 +20,39 @@ public actor LBEngine {
     }
     
     public init() async throws {
-        io = try SoundIO()
-        
-        #if os(macOS)
-        try io.connect(to: Backend.coreAudio)
-        #else
         do {
-            try io.connect(to: Backend.jack)
-        } catch {
-            try io.connect()
-        }
-        #endif
-        
-        io.flushEvents()
-        
-        io.onDevicesChange {
-            self._inputDeviceCount = try? $0.inputDeviceCount()
-            self._outputDeviceCount = try? $0.outputDeviceCount()
-        }
-        
-        eventLoop = Task.detached {
-            while true {
-                self.io.waitEvents()
+            io = try SoundIO()
+            
+            #if os(macOS)
+            try io.connect(to: Backend.coreAudio)
+            #else
+            do {
+                try io.connect(to: Backend.jack)
+            } catch {
+                print("Cannot establish JACK connection")
+                do {
+                    try io.connect()
+                } catch {
+                    print("Cannot establish Audio Backend connection")
+                }
             }
+            #endif
+            
+            io.flushEvents()
+            
+            io.onDevicesChange {
+                self._inputDeviceCount = try? $0.inputDeviceCount()
+                self._outputDeviceCount = try? $0.outputDeviceCount()
+            }
+            
+            eventLoop = Task.detached {
+                while true {
+                    self.io.waitEvents()
+                }
+            }
+        } catch {
+            print("Error occured: ", error.localizedDescription)
+            fatalError()
         }
     }
     
@@ -61,6 +71,7 @@ public actor LBEngine {
         
         out = try OutStream(to: device)
         out.format = .signed16bitLittleEndian
+        out.softwareLatency = 0
     }
     
     public func start() async throws {
@@ -68,20 +79,24 @@ public actor LBEngine {
             var secondsOffset: Float = 0
             
             
+            out.underflowCallback { outstream in
+                print("Underflow Occured")
+            }
+            
             out.writeCallback { (outstream, frameCountMin, frameCountMax) in
                 let layout = outstream.layout
                 let secondsPerFrame = 1.0 / Float(outstream.sampleRate)
-
+                
                 var framesLeft = frameCountMax
-
+                
                 while 0 < framesLeft {
                     var frameCount = framesLeft
                     let areas = try! outstream.beginWriting(theNumberOf: &frameCount)
-
+                    
                     if frameCount == 0 {
                         break
                     }
-
+                    
                     for frame in 0..<frameCount {
                         let time = Float(frame) * secondsPerFrame + secondsOffset
                         
@@ -95,13 +110,19 @@ public actor LBEngine {
                     secondsOffset = (secondsOffset + secondsPerFrame * Float(frameCount))
 //                        .truncatingRemainder(dividingBy: 1)
                     try! outstream.endWrite()
-
+                    
                     framesLeft -= frameCountMax
                 }
             }
             
             try out.open()
             try out.start()
+            
+            try out.withInternalPointer { pointer in
+                var latency: Double = 0
+                soundio_outstream_get_latency(pointer, &latency)
+                print("Latency:", String(format: "%.8f", latency * 1000), "ms")
+            }
             
             while !Task.isCancelled {
                 await Task.yield()
