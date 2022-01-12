@@ -4,8 +4,6 @@ import Foundation
 public typealias Frequency = Double
 
 /// Represents pitch in terms of an exponent of 2. For example, value of 0 equals to standard pitch, 1 equals to an octave higher than standard pitch.
-///
-/// This value is usually produced by a `Function` and rounded to the closest pitch class in the given tuning system.
 public typealias Pitch = Double
 
 public typealias Interval = Double
