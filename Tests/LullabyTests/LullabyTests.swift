@@ -15,7 +15,7 @@ final class LullabyTests: XCTestCase {
             }
         }
 
-        let engine = try await LBEngine()
+        let engine = try await SoundIOEngine()
 
         await engine.setOutput(to: carrier)
         try await engine.prepare()
@@ -23,7 +23,7 @@ final class LullabyTests: XCTestCase {
         
         await task.value
         
-        await engine.stop()
+        try await engine.stop()
     }
     
     func testFM() async throws {
@@ -39,7 +39,7 @@ final class LullabyTests: XCTestCase {
             }
         }
 
-        let engine = try await LBEngine()
+        let engine = try await SoundIOEngine()
 
         await engine.setOutput(to: carrier)
         try await engine.prepare()
@@ -47,6 +47,6 @@ final class LullabyTests: XCTestCase {
         
         await task.value
         
-        await engine.stop()
+        try await engine.stop()
     }
 }

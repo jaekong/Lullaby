@@ -2,8 +2,79 @@ import Foundation
 import SoundIO
 import CSoundIO
 
-@available(macOS 12.0.0, *)
-public actor LBEngine {
+public protocol LBEngine: Actor {
+    func setOutput(to signal: Signal)
+    init() async throws
+    func prepare() throws
+    func start() async throws
+    func stop() throws
+    static func playTest(of signal: Signal, for seconds: Double) async throws
+}
+
+public actor DummyEngine: LBEngine {
+    private var output: Signal = 0
+    private var audioTask: Task<Void, Never>?
+    
+    public var buffer: Int = 512
+    public var sampleRate: Int = 44100
+    
+    public var printEnabled = true
+    
+    public var latency: Time {
+        return Time(buffer) / Time(sampleRate)
+    }
+    
+    public init() async throws {
+        
+    }
+    
+    public func setOutput(to signal: Signal) {
+        self.output = signal
+    }
+    
+    public func prepare() throws {
+        
+    }
+    
+    public func start() async throws {
+        audioTask = Task {
+            let secondsPerFrame = 1.0 / Float(sampleRate)
+            var secondsOffset: Time = 0
+            
+            while true {
+                for i in 0..<buffer {
+                    if printEnabled {
+                        print(output(secondsOffset))
+                    } else {
+                        let _ = output(secondsOffset)
+                    }
+                    
+                    secondsOffset += secondsPerFrame
+                }
+                
+                await Task.sleep(seconds: Double(latency))
+                if Task.isCancelled {
+                    break
+                }
+            }
+        }
+    }
+    
+    public func stop() throws {
+        audioTask?.cancel()
+    }
+    
+    public static func playTest(of signal: Signal, for seconds: Double) async throws {
+        let engine = try await Self()
+        await engine.setOutput(to: signal)
+        try await engine.prepare()
+        try await engine.start()
+        await Task.sleep(seconds: seconds)
+        try await engine.stop()
+    }
+}
+
+public actor SoundIOEngine: LBEngine {
     private let io: SoundIO
     private var eventLoop: Task<Void, Never>!
     private var audioTask: Task<(), Error>?
@@ -129,7 +200,7 @@ public actor LBEngine {
         }
     }
     
-    public func stop() {
+    public func stop() throws {
         audioTask?.cancel()
         eventLoop?.cancel()
         
@@ -148,6 +219,6 @@ public actor LBEngine {
         try await engine.prepare()
         try await engine.start()
         await Task.sleep(seconds: seconds)
-        await engine.stop()
+        try await engine.stop()
     }
 }
