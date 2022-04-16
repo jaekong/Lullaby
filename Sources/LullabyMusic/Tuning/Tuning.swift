@@ -6,8 +6,6 @@ public typealias Frequency = Double
 /// Represents pitch in terms of an exponent of 2. For example, value of 0 equals to standard pitch, 1 equals to an octave higher than standard pitch.
 public typealias Pitch = Double
 
-public typealias Interval = Double
-
 /// Double-precision real number ratio. Used to represent interval.
 public struct Ratio: Equatable, Codable, Hashable {
     fileprivate var numerator: Int = 1
@@ -112,57 +110,69 @@ public func primeLimitedIntervals(n: Int, max: Int) -> Set<Ratio> {
 
 /// A struct representing a tuning system.
 public struct Tuning: Codable {
-    public var intervals: [Interval]
+    public var pitches: [Pitch]
+    public var intervals: [Ratio]?
     
     public var n: Int = 5 {
         didSet {
             switch mode {
             case .primeLimitedTuning:
-                intervals = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
-            default:
-                break
-            }
-        }
-    }
-    public var max: Int = 40 {
-        didSet {
-            switch mode {
-            case .primeLimitedTuning:
-                intervals = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
-            default:
-                break
-            }
-        }
-    }
-    public var toneCount: Int = 12 {
-        didSet {
-            switch mode {
-            case .equalTemperamentTuning:
-                intervals = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+                pitches = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
             default:
                 break
             }
         }
     }
     
-    public var standardFrequency: Frequency {
+    public var max: Int = 40 {
         didSet {
             switch mode {
-            case .equalTemperamentTuning:
-               intervals = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
             case .primeLimitedTuning:
-               intervals = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
+                pitches = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
+            default:
+                break
             }
         }
     }
+    
+    public var toneCount: Int = 12 {
+        didSet {
+            switch mode {
+            case .equalTemperamentTuning:
+                pitches = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+            default:
+                break
+            }
+        }
+    }
+    
+    public var standardFrequency: Frequency
+    
+//    public var standardFrequency: Frequency {
+//        didSet {
+//            switch mode {
+//            case .equalTemperamentTuning:
+//                pitches = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+//            case .primeLimitedTuning:
+//                intervals = [Ratio(1, 1)] + primeLimitedIntervals(n: n, max: max).sorted()
+//                pitches = intervals!.map { $0.decimalValue }
+//            case .customJustIntonation:
+//                pitches = intervals.map { $0.decimalValue }
+//            }
+//        }
+//    }
     
     public var mode: Mode {
         didSet {
             switch mode {
             case .equalTemperamentTuning:
-                intervals = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+                pitches = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
             case .primeLimitedTuning:
-                intervals = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
+                intervals = [Ratio(1, 1)] + primeLimitedIntervals(n: n, max: max).sorted()
+                pitches = intervals!.map { $0.decimalValue }
+            case .customJustIntonation:
+                precondition(intervals != nil)
+                pitches = intervals!.map { $0.decimalValue }
             }
         }
     }
@@ -177,7 +187,8 @@ public struct Tuning: Codable {
         self.max = max
         self.standardFrequency = standardFrequency
         self.mode = .primeLimitedTuning
-        self.intervals = [1] + primeLimitedIntervals(n: n, max: max).sorted().map { $0.decimalValue }
+        self.intervals = [Ratio(1, 1)] + primeLimitedIntervals(n: n, max: max).sorted()
+        self.pitches = intervals!.map { $0.decimalValue }
     }
     
     /// Equal temperament tuning system that can have arbitrary number of tones in an octave. Standard 12TET system can be achieved with this.
@@ -188,12 +199,25 @@ public struct Tuning: Codable {
         self.toneCount = toneCount
         self.standardFrequency = standardFrequency
         self.mode = .equalTemperamentTuning
-        self.intervals = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+        self.pitches = (0..<toneCount).map { (tone: Int) in pow(2, Double(tone) / Double(toneCount)) }
+    }
+    
+    /// Just intonation tuning system with custom intervals.
+    /// - Parameters:
+    ///     - intervals: Intervals between notes. Intervals should start with 1 representing tonic note.
+    ///     - standardFrequency: Standard pitch for the tuning. Defaults to 440Hz.
+    public init(intervals: [Ratio], standardFrequency: Frequency = 440) {
+        self.toneCount = intervals.count
+        self.standardFrequency = standardFrequency
+        self.mode = .customJustIntonation
+        self.intervals = intervals
+        self.pitches = intervals.map { $0.decimalValue }
     }
     
     public enum Mode: String, Codable {
         case primeLimitedTuning
         case equalTemperamentTuning
+        case customJustIntonation
     }
 }
 
@@ -202,7 +226,7 @@ extension Tuning {
         let octave = floor(note)
         let pitchClass = note - octave
 
-        guard let closestNote = intervals.sorted(by: { a, b in
+        guard let closestNote = pitches.sorted(by: { a, b in
             abs(Double(a) - pow(2, pitchClass)) < abs(Double(b) - pow(2, pitchClass))
         }).first else {
             return standardFrequency * octave
@@ -215,7 +239,7 @@ extension Tuning {
         let octave = floor(note)
         let pitchClass = note - octave
 
-        guard let closestNote = intervals.sorted(by: { a, b in
+        guard let closestNote = pitches.sorted(by: { a, b in
             abs(Double(a) - pow(2, pitchClass)) < abs(Double(b) - pow(2, pitchClass))
         }).first else {
             return note
