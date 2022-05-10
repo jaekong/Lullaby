@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "SoundIO",
-        "repositoryURL": "https://github.com/thara/SoundIO.git",
-        "state": {
-          "branch": null,
-          "revision": "35a99fd182a64a35f8af32833da4923d5ef7e7f8",
-          "version": "0.3.3"
-        }
-      },
-      {
         "package": "swift-collections",
         "repositoryURL": "https://github.com/apple/swift-collections.git",
         "state": {

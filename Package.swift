@@ -15,15 +15,15 @@ let package = Package(
         .library(
             name: "LullabyMusic",
             targets: ["LullabyMusic"]),
-        .library(
-            name: "LullabySoundIOEngine",
-            targets: ["LullabySoundIOEngine"]),
+//        .library(
+//            name: "LullabySoundIOEngine",
+//            targets: ["LullabySoundIOEngine"]),
         .library(
             name: "LullabyMiniAudioEngine",
             targets: ["LullabyMiniAudioEngine"])
     ],
     dependencies: [
-        .package(url: "https://github.com/thara/SoundIO.git", from: "0.3.2"),
+//        .package(url: "https://github.com/thara/SoundIO.git", from: "0.3.2"),
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "0.0.5"))
 //        .package(url: "https://github.com/apple/swift-numerics.git", .upToNextMajor(from: "0.1.0"))
     ],
@@ -38,15 +38,15 @@ let package = Package(
         .target(
             name: "LullabyMusic"
         ),
-        .target(
-            name: "LullabySoundIOEngine",
-            dependencies: [
-                .product(name: "SoundIO", package: "SoundIO"),
-                .product(name: "Collections", package: "swift-collections"),
-                .target(name: "Lullaby")
-            ],
-            linkerSettings: [.unsafeFlags(["-L/usr/local/lib"])]
-        ),
+//        .target(
+//            name: "LullabySoundIOEngine",
+//            dependencies: [
+//                .product(name: "SoundIO", package: "SoundIO"),
+//                .product(name: "Collections", package: "swift-collections"),
+//                .target(name: "Lullaby")
+//            ],
+//            linkerSettings: [.unsafeFlags(["-L/usr/local/lib"])]
+//        ),
         .target(
             name: "CMiniAudio",
             dependencies: [],
@@ -66,7 +66,7 @@ let package = Package(
             name: "LullabyTests",
             dependencies: [
                 .target(name: "Lullaby"),
-                .target(name: "LullabySoundIOEngine"),
+//                .target(name: "LullabySoundIOEngine"),
                 .target(name: "LullabyMiniAudioEngine")
             ])
     ]
