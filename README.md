@@ -7,6 +7,8 @@
 
 Lullaby is an audio synthesis framework for Swift that supports both macOS and Linux! It was inspired by other audio environments like FAUST, SuperCollider, Max and an article "Functional Signal Processing in Swift".
 
+Currently, it is not production-ready, but I would like to know what you think!
+
 ## What Can I do with it?
 
 - Audio Synthesis
@@ -86,5 +88,13 @@ while !task.isCancelled {}
   - Writing musical pieces through custom DSL.
   - Phrases, Loops and more.
 - Test on other platforms (iOS, Windows, etcs.)
+- API Documentation
+
+## Attribution
+
+- [SoundIO](https://github.com/thara/SoundIO), a Swift binding of [libsoundio](https://github.com/andrewrk/libsoundio) is used in the source code, but it will be deprecated in favour of miniaudio.
+- [miniaudio](https://miniaud.io) is used internally to handle audio I/O.
+
+- Lullaby is licensed under [MIT License](LICENSE). You don't have to, but it would be nice if you let me know if you used Lullaby!
 
 [^1]: Tested on Raspberry Pi 4B running Raspberry Pi OS Bullseye and Ubuntu 22.04 LTS. Theoretically, it should work on other platforms too. I couldn't test it though. If it doesn't work, please open an issue.
