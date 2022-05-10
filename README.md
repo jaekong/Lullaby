@@ -1,5 +1,10 @@
 # Lullaby
 
+![For Swift 5.5+](https://img.shields.io/badge/swift-5.5%2B-orange?style=flat-square)
+![Build Status](https://img.shields.io/github/workflow/status/jtodaone/Lullaby/build?style=flat-square)  
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjtodaone%2FLullaby%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/jtodaone/Lullaby)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjtodaone%2FLullaby%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/jtodaone/Lullaby)
+
 Lullaby is an audio synthesis framework for Swift that supports both macOS and Linux! It was inspired by other audio environments like FAUST, SuperCollider, Max and an article "Functional Signal Processing in Swift".
 
 ## What Can I do with it?
@@ -9,14 +14,68 @@ Lullaby is an audio synthesis framework for Swift that supports both macOS and L
 - Real-time Reactive Audio Effects for Games and Apps
 - Data Sonification
 
-## Requirments
+## Supported Platforms
 
-- macOS / Linux
+- Tested on macOS / Linux[^1]
 - Swift 5.5
-- libsoundio (Lullaby depends on [SoundIO](https://github.com/thara/SoundIO) Swift wrapper for libsoundio)
+
+## Usage
+
+```swift
+//...
+dependencies: [
+    // ...
+    .package(url: "https://github.com/jtodaone/Lullaby.git", from: "0.2.0")
+],
+targets: [
+    .executableTarget(
+        // ...
+        dependencies: [
+            .product(name: "Lullaby", package: "Lullaby"),
+            .product(name: "LullabyMusic", package: "Lullaby"),
+            .product(name: "LullabyMiniAudioEngine", package: "Lullaby")
+        ]
+    )
+]
+//...
+```
 
 ## Examples
 
 ```swift
+import Lullaby
+import LullabyMusic
+import LullabyMiniAudioEngine
+
+func sineTest() async throws {
+    let value = Value(value: 440)
+    
+    let carrier = await sine(frequency: value.output)
+    
+    let task = Task {
+        for i in twelveToneEqualTemperamentTuning.pitches {
+            await value.setValue(Sample(i * 440))
+            await Task.sleep(seconds: 0.5)
+        }
+    }
+
+    let engine = try await MiniAudioEngine()
+
+    engine.setOutput(to: carrier)
+    try engine.prepare()
+    try engine.start()
+    
+    await task.value
+    
+    try engine.stop()
+}
+
+let task = Task {
+    try await sineTest()
+}
+
+while !task.isCancelled {}
 
 ```
+
+[^1]: Theoretically, it should work on other platforms too. I couldn't test it though. If it doesn't work, please open an issue.
