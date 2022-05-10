@@ -87,4 +87,4 @@ while !task.isCancelled {}
   - Phrases, Loops and more.
 - Test on other platforms (iOS, Windows, etcs.)
 
-[^1]: Theoretically, it should work on other platforms too. I couldn't test it though. If it doesn't work, please open an issue.
+[^1]: Tested on Raspberry Pi 4B running Raspberry Pi OS Bullseye and Ubuntu 22.04 LTS. Theoretically, it should work on other platforms too. I couldn't test it though. If it doesn't work, please open an issue.
