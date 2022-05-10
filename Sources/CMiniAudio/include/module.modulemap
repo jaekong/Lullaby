@@ -1,0 +1,3 @@
+module CMiniAudio {
+    header "miniaudio.h"
+}

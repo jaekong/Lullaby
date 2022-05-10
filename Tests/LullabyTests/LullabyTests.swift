@@ -1,39 +1,66 @@
 import XCTest
 @testable import Lullaby
 @testable import LullabyMusic
+import LullabySoundIOEngine
+import LullabyMiniAudioEngine
 
-final class LullabyTests: XCTestCase {
+final class LullabyTestsMiniAudio: XCTestCase {
     func testSine() async throws {
         let value = Value(value: 440)
         
         let carrier = await sine(frequency: value.output)
         
         let task = Task {
-            for i in twelveToneEqualTemperamentTuning.intervals {
+            for i in twelveToneEqualTemperamentTuning.pitches {
                 await value.setValue(Sample(i * 440))
                 await Task.sleep(seconds: 0.5)
             }
         }
 
-        let engine = try await SoundIOEngine()
+        let engine = try await MiniAudioEngine()
 
-        await engine.setOutput(to: carrier)
-        try await engine.prepare()
-        try await engine.start()
+        engine.setOutput(to: carrier)
+        try engine.prepare()
+        try engine.start()
         
         await task.value
         
-        try await engine.stop()
+        try engine.stop()
     }
     
     func testFM() async throws {
         let value = Value(value: 440)
-        
+
         let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
         let carrier = sine(frequency: modulator)
+
+        let task = Task {
+            for i in twelveToneEqualTemperamentTuning.pitches {
+                await value.setValue(Sample(i * 440))
+                await Task.sleep(seconds: 0.5)
+            }
+        }
+
+        let engine = try await MiniAudioEngine()
+
+        engine.setOutput(to: carrier)
+        try engine.prepare()
+        try engine.start()
+
+        await task.value
+
+        try engine.stop()
+    }
+}
+
+final class LullabyTestsSoundIO: XCTestCase {
+    func testSine() async throws {
+        let value = Value(value: 440)
+        
+        let carrier = await sine(frequency: value.output)
         
         let task = Task {
-            for i in twelveToneEqualTemperamentTuning.intervals {
+            for i in twelveToneEqualTemperamentTuning.pitches {
                 await value.setValue(Sample(i * 440))
                 await Task.sleep(seconds: 0.5)
             }
@@ -41,12 +68,36 @@ final class LullabyTests: XCTestCase {
 
         let engine = try await SoundIOEngine()
 
-        await engine.setOutput(to: carrier)
-        try await engine.prepare()
-        try await engine.start()
+        engine.setOutput(to: carrier)
+        try engine.prepare()
+        try engine.start()
         
         await task.value
         
-        try await engine.stop()
+        try engine.stop()
+    }
+    
+    func testFM() async throws {
+        let value = Value(value: 440)
+
+        let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
+        let carrier = sine(frequency: modulator)
+
+        let task = Task {
+            for i in twelveToneEqualTemperamentTuning.pitches {
+                await value.setValue(Sample(i * 440))
+                await Task.sleep(seconds: 0.5)
+            }
+        }
+
+        let engine = try await SoundIOEngine()
+
+        engine.setOutput(to: carrier)
+        try engine.prepare()
+        try engine.start()
+
+        await task.value
+
+        try engine.stop()
     }
 }
