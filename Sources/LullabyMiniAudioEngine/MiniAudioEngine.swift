@@ -73,7 +73,7 @@ final public class MiniAudioEngine: LBEngine {
     }
 }
 
-public func writeCallback(_ device: UnsafeMutablePointer<ma_device>?, _ pOutput: UnsafeMutableRawPointer?, _ pInput: UnsafeRawPointer?, _ frameCount: ma_uint32) -> Void {
+fileprivate func writeCallback(_ device: UnsafeMutablePointer<ma_device>?, _ pOutput: UnsafeMutableRawPointer?, _ pInput: UnsafeRawPointer?, _ frameCount: ma_uint32) -> Void {
     guard (device?.pointee) != nil else { return }
     
     guard var cursor = pOutput else { return }
