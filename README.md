@@ -78,4 +78,13 @@ while !task.isCancelled {}
 
 ```
 
+## Future Plans
+
+- Polyphonic synthesiser system, using Oscillators and Envelopes.
+- Triggers subscribing to external events - key presses, MIDI, etcs.
+- Musical Composition DSL system
+  - Writing musical pieces through custom DSL.
+  - Phrases, Loops and more.
+- Test on other platforms (iOS, Windows, etcs.)
+
 [^1]: Theoretically, it should work on other platforms too. I couldn't test it though. If it doesn't work, please open an issue.
