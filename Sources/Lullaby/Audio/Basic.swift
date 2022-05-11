@@ -18,7 +18,7 @@ public extension Amplitude {
 public typealias Time = Precision
 
 public extension Task where Success == Never, Failure == Never{
-    static func sleep(seconds: Double) async {
+    static func sleep<T: BinaryFloatingPoint>(seconds: T) async {
         let nanoseconds = UInt64(seconds * 1_000_000_000)
         try? await Self.sleep(nanoseconds: nanoseconds)
     }
