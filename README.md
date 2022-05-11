@@ -59,6 +59,8 @@ func sineTest() async throws {
             await value.setValue(Sample(i * 440))
             await Task.sleep(seconds: 0.5)
         }
+        
+        return
     }
 
     let engine = try await MiniAudioEngine()
@@ -74,6 +76,7 @@ func sineTest() async throws {
 
 let task = Task {
     try await sineTest()
+    task.cancel()
 }
 
 while !task.isCancelled {}
