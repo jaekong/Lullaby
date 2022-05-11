@@ -12,7 +12,6 @@ public func adsr(trigger: Signal, attack: Time, decay: Time, sustain: Amplitude,
     return Signal({ time -> Sample in
         let triggerSample = trigger(time)
         if internalTriggeredTime == nil && triggerSample >= 0.5 {
-            print("triggered at \(time)")
             internalTriggeredTime = time
             return 0
         }
@@ -22,7 +21,6 @@ public func adsr(trigger: Signal, attack: Time, decay: Time, sustain: Amplitude,
         }
         
         if internalReleasedTime == nil && triggerSample < 0.5 {
-            print("released at \(time)")
             internalReleasedTime = time
             return sustain
         }
