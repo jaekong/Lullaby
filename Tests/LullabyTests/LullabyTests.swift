@@ -1,7 +1,6 @@
 import XCTest
 @testable import Lullaby
 @testable import LullabyMusic
-//import LullabySoundIOEngine
 import LullabyMiniAudioEngine
 
 final class LullabyTestsMiniAudio: XCTestCase {
@@ -82,6 +81,43 @@ final class LullabyTestsMiniAudio: XCTestCase {
 
         await task.value
 
+        try engine.stop()
+    }
+    
+    func testTrigger() async throws {
+        let value = Value(value: 440)
+
+        let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
+        let carrier = sine(frequency: modulator)
+        
+        let trigger = Trigger()
+        
+        let envelope = adsr(trigger: await trigger.output, attack: 0.01, decay: 0.2, sustain: 0.8, release: 0.3)
+        
+        let task = Task {
+            while true {
+                guard let input = readLine() else {
+                    continue
+                }
+                
+                guard input != "exit" else {
+                    return
+                }
+                
+                if !input.isEmpty {
+                    await trigger.impulse(sustain: 0.5)
+                }
+            }
+        }
+
+        let engine = try await MiniAudioEngine()
+
+        engine.setOutput(to: carrier * envelope)
+        try engine.prepare()
+        try engine.start()
+        
+        await task.value
+        
         try engine.stop()
     }
 }
