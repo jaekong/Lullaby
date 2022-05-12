@@ -6,7 +6,7 @@ import Foundation
 /// ```
 /// let triangle = linearInterpolatedWavetable(samplePoints: [0, 1, 0, -1, 0])
 /// ```
-func linearInterpolatedWavetable(samplePoints: [Sample]) -> Wave {
+public func linearInterpolatedWavetable(samplePoints: [Sample]) -> Wave {
     let sampleCount = samplePoints.count - 1
     let sampleRange = Phase(sampleCount)
 
