@@ -8,11 +8,17 @@ internal enum LookupTables {
     static let squareTable: [Float] = [1, -1]
 }
 
-/// A pre-defined wavetable based sine wave function.
-public let sineWave = wavetable(from: LookupTables.sineTable)
+public enum BasicWaves {
+    public static let rampUp = linearInterpolatedWavetable(samplePoints: [0, 1])
+    public static let rampDown = linearInterpolatedWavetable(samplePoints: [1, 0])
+    public static let constant = wavetable(from: [0])
+    
+    /// A pre-defined wavetable based sine wave function.
+    public static let sine = wavetable(from: LookupTables.sineTable)
 
-/// A pre-defined linear-interpolated wavetable based triangle wave function.
-public let triangleWave = linearInterpolatedWavetable(samplePoints: [0, 1, 0, -1, 0])
+    /// A pre-defined linear-interpolated wavetable based triangle wave function.
+    public static let triangle = linearInterpolatedWavetable(samplePoints: [0, 1, 0, -1, 0])
 
-/// A pre-defined wavetable based square wave function.
-public let squareWave = wavetable(from: LookupTables.squareTable)
+    /// A pre-defined wavetable based square wave function.
+    public static let square = wavetable(from: LookupTables.squareTable)
+}
