@@ -47,11 +47,11 @@ public extension Signal {
         return Signal { _ in value }
     }
     
-    static func constant(_ value: Int) -> Signal {
+    static func constant<T: BinaryInteger>(_ value: T) -> Signal {
         return Signal { _ in Sample(value) }
     }
     
-    static func constant(_ value: Double) -> Signal {
+    static func constant<T: BinaryFloatingPoint>(_ value: T) -> Signal {
         return Signal { _ in Sample(value) }
     }
 }
