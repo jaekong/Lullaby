@@ -12,8 +12,8 @@ public class Oscillator {
     public var phase: Phase
 
     private var lastTime: Time = 0
-
-    public func callAsFunction() -> Signal {
+    
+    public var output: Signal {
         return Signal { time in
             self.phase += Phase(self.frequency(time) * (time - self.lastTime))
             self.phase = self.phase.truncatingRemainder(dividingBy: 1)
