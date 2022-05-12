@@ -2,31 +2,35 @@ import Foundation
 
 /// An actor that can be used to trigger envelopes.
 public actor Trigger {
-    private var value: Value
+    private var value: Sample = 0
     
     public var output: Signal {
         get async {
-            return await value.output
+            return Signal { _ in
+                return self.value
+            }
         }
     }
     
-    init() {
-        value = Value(value: 0)
+    public var targetValue: Sample
+    
+    init(target: Sample = 1) {
+        self.targetValue = target
     }
     
     public func impulse(sustain: Time? = nil) async {
-        await value.setValue(1)
+        value = targetValue
         if let sustain = sustain {
             await Task.sleep(seconds: sustain)
         }
-        await value.setValue(0)
+        value = 0
     }
     
     public func activate() async {
-        await value.setValue(1)
+        value = targetValue
     }
     
     public func deactivate() async {
-        await value.setValue(0)
+        value = 0
     }
 }
