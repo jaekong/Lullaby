@@ -1,7 +1,7 @@
 import Foundation
 
-/// An actor that can be used to trigger envelopes.
-public actor Trigger {
+/// An actor that can be used as a gate.
+public actor Gate {
     private var value: Sample = 0
     
     public var output: Signal {
@@ -26,11 +26,11 @@ public actor Trigger {
         value = 0
     }
     
-    public func activate() async {
+    public func activate() {
         value = targetValue
     }
     
-    public func deactivate() async {
+    public func deactivate() {
         value = 0
     }
 }
