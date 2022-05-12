@@ -33,18 +33,14 @@ final class LullabyTestsMiniAudio: XCTestCase {
         let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
         let carrier = sine(frequency: modulator)
         
-        let trigger = Value(value: 0)
+        let trigger = Gate()
         
         let envelope = adsr(trigger: await trigger.output, attack: 0.1, decay: 0.5, sustain: 0.5, release: 0.5)
         
         let task = Task {
             for i in twelveToneEqualTemperamentTuning.pitches {
                 await value.setValue(Sample(i * 440))
-                await trigger.setValue(1)
-                print(await trigger.value)
-                await Task.sleep(seconds: 2)
-                await trigger.setValue(0)
-                print(await trigger.value)
+                await trigger.impulse(sustain: 1)
                 await Task.sleep(seconds: 2)
             }
         }
@@ -52,6 +48,33 @@ final class LullabyTestsMiniAudio: XCTestCase {
         let engine = try await MiniAudioEngine()
 
         engine.setOutput(to: carrier * envelope)
+        try engine.prepare()
+        try engine.start()
+        
+        await task.value
+        
+        try engine.stop()
+    }
+    
+    func testADSR2() async throws {
+        let value = Value(value: 440)
+
+        let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
+        let carrier = sine(frequency: modulator)
+        
+        let envelope = ADSR(attack: 0.1, decay: 0.5, sustain: 1, release: 0.5)
+        
+        let task = Task {
+            for i in twelveToneEqualTemperamentTuning.pitches {
+                await value.setValue(Sample(i * 440))
+                await envelope.impulse(sustain: 5)
+                await Task.sleep(seconds: 2)
+            }
+        }
+
+        let engine = try await MiniAudioEngine()
+
+        await engine.setOutput(to: carrier * envelope.output)
         try engine.prepare()
         try engine.start()
         
@@ -90,7 +113,7 @@ final class LullabyTestsMiniAudio: XCTestCase {
         let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
         let carrier = sine(frequency: modulator)
         
-        let trigger = Trigger()
+        let trigger = Gate()
         
         let envelope = adsr(trigger: await trigger.output, attack: 0.01, decay: 0.2, sustain: 0.8, release: 0.3)
         
