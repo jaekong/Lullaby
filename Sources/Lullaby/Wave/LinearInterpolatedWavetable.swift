@@ -1,5 +1,11 @@
 import Foundation
 
+/// Generates linear-interpolated Wave function from given sample points.
+///
+/// To make a triangle wave function, you can provide five sample points like below.
+/// ```
+/// let triangle = linearInterpolatedWavetable(samplePoints: [0, 1, 0, -1, 0])
+/// ```
 func linearInterpolatedWavetable(samplePoints: [Sample]) -> Wave {
     let sampleCount = samplePoints.count - 1
     let sampleRange = Phase(sampleCount)

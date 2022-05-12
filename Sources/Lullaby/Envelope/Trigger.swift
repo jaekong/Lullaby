@@ -1,5 +1,6 @@
 import Foundation
 
+/// An actor that can be used to trigger envelopes.
 public actor Trigger {
     private var value: Value
     
