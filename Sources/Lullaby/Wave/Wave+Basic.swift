@@ -9,9 +9,9 @@ internal enum LookupTables {
 }
 
 public enum BasicWaves {
-    public static let rampUp = linearInterpolatedWavetable(samplePoints: [0, 1])
-    public static let rampDown = linearInterpolatedWavetable(samplePoints: [1, 0])
-    public static let constant = wavetable(from: [0])
+    public static let rampUp: Wave = { phase in max(min(phase, 1), 0) }
+    public static let rampDown: Wave = { phase in max(min(1 - phase, 1), 0) }
+    public static let constant = wavetable(from: [1])
     
     /// A pre-defined wavetable based sine wave function.
     public static let sine = wavetable(from: LookupTables.sineTable)

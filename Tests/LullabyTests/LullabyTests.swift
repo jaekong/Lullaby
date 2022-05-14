@@ -62,13 +62,13 @@ final class LullabyTestsMiniAudio: XCTestCase {
         let modulator: Signal = await sine(frequency: value.output) * ((sine(frequency: value.output) + 1) * 250) + value.output
         let carrier = sine(frequency: modulator)
         
-        let envelope = ADSR(attack: 0.1, decay: 0.5, sustain: 1, release: 0.5)
+        let envelope = EnvelopeGenerator(attack: 0.1, release: 0.5)
         
         let task = Task {
             for i in twelveToneEqualTemperamentTuning.pitches {
                 await value.setValue(Sample(i * 440))
-                await envelope.impulse(sustain: 5)
-                await Task.sleep(seconds: 2)
+                await envelope.impulse(sustain: 1)
+                await Task.sleep(seconds: 0.1)
             }
         }
 
