@@ -88,7 +88,6 @@ public actor EnvelopeGenerator {
                 
                 if self.internalReleasedTime == nil && !self.activated {
                     self.internalReleasedTime = time
-                    return self.releaseShape(0) * (self.lastValue ?? 1)
                 }
                 
                 let elapsedTime = time - triggeredTime
