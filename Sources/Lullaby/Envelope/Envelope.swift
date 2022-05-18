@@ -1,19 +1,51 @@
 import Foundation
 
+/// ADSR / AR Envelope data with custom curve shapes.
 public struct Envelope {
+    public var attack: Time
+    public var decay: Time? = nil
+    public var sustain: Amplitude? = nil
+    public var release: Time
+    
     public var attackShape: Wave
     public var decayShape: Wave? = nil
     public var sustainShape: Wave? = nil
     public var releaseShape: Wave
     
-    public var attack: Time
-    public var decay: Time? = nil
-    public var sustain: Amplitude? = nil
-    public var release: Time
+    public init(attack: Time, decay: Time? = nil, sustain: Amplitude? = nil, release: Time, attackShape: @escaping Wave = BasicWaves.rampUp, decayShape: Wave? = BasicWaves.rampDown, sustainShape: Wave? = BasicWaves.constant, releaseShape: @escaping Wave = BasicWaves.rampDown) {
+        
+        precondition(attack >= 0, "Attack value should be positive.")
+        precondition(release >= 0, "Release value should be positive.")
+        
+        guard
+            let decay = decay,
+            let sustain = sustain,
+            let decayShape = decayShape,
+            let sustainShape = sustainShape
+        else {
+            self.attackShape = attackShape
+            self.releaseShape = releaseShape
+            self.attack = attack
+            self.release = release
+            return
+        }
+        
+        precondition(decay >= 0, "Decay value should be positive.")
+        precondition(sustain >= 0, "Sustain value should be positive.")
+        
+        self.attackShape = attackShape
+        self.decayShape = decayShape
+        self.sustainShape = sustainShape
+        self.releaseShape = releaseShape
+        self.attack = attack
+        self.decay = decay
+        self.sustain = sustain
+        self.release = release
+    }
 }
 
-/// ADSR / AR Envelope with custom curve shapes.
-public actor EnvelopeGenerator {
+/// ADSR / AR Envelope Generator with custom curve shapes.
+public class EnvelopeGenerator {
     public let envelope: Envelope
     
     private var attackShape: Wave { return envelope.attackShape }
@@ -33,36 +65,25 @@ public actor EnvelopeGenerator {
     
     private var lastValue: Amplitude? = nil
     
-    init(attack: Time, decay: Time? = nil, sustain: Amplitude? = nil, release: Time, attackShape: @escaping Wave = BasicWaves.rampUp, decayShape: Wave? = BasicWaves.rampDown, sustainShape: Wave? = BasicWaves.constant, releaseShape: @escaping Wave = BasicWaves.rampDown) {
-        precondition(attack >= 0, "Attack value should be positive.")
-        precondition(release >= 0, "Release value should be positive.")
-        
-        guard
-            let decay = decay,
-            let sustain = sustain,
-            let decayShape = decayShape,
-            let sustainShape = sustainShape
-        else {
-            self.envelope = Envelope(attackShape: attackShape, releaseShape: releaseShape, attack: attack, release: release)
-            return
-        }
-        
-        precondition(decay >= 0, "Decay value should be positive.")
-        precondition(sustain >= 0, "Sustain value should be positive.")
-        
-        self.envelope = Envelope(attackShape: attackShape, decayShape: decayShape, sustainShape: sustainShape, releaseShape: releaseShape, attack: attack, decay: decay, sustain: sustain, release: release)
+    public init(attack: Time, decay: Time? = nil, sustain: Amplitude? = nil, release: Time, attackShape: @escaping Wave = BasicWaves.rampUp, decayShape: Wave? = BasicWaves.rampDown, sustainShape: Wave? = BasicWaves.constant, releaseShape: @escaping Wave = BasicWaves.rampDown) {
+        self.envelope = Envelope(attack: attack, decay: decay, sustain: sustain, release: release, attackShape: attackShape, decayShape: decayShape, sustainShape: sustainShape, releaseShape: releaseShape)
+    }
+    
+    public init(envelope: Envelope) {
+        self.envelope = envelope
     }
     
     public func impulse(sustain: Time? = nil) async {
-        activated = true
-        if let sustain = sustain {
-            await Task.sleep(seconds: sustain)
-        }
-        activated = false
+        activate()
+        await Task.sleep(seconds: sustain ?? self.attack + self.release)
+        deactivate()
     }
     
     public func activate() {
         activated = true
+        self.internalReleasedTime = nil
+        self.internalTriggeredTime = nil
+        self.lastValue = nil
     }
     
     public func deactivate() {

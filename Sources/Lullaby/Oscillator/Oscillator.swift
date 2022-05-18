@@ -11,15 +11,16 @@ public class Oscillator {
     public var wave: Wave
     public var frequency: Signal
     public var phase: Phase
-
-    private var lastTime: Time = 0
     
     public var output: Signal {
+        var lastTime: Time = 0
+        
         return Signal { time in
-            self.phase += Phase(self.frequency(time) * (time - self.lastTime))
+            let deltaTime = max(time - lastTime, 0)
+            self.phase += Phase(self.frequency(time) * (deltaTime))
             self.phase = self.phase.truncatingRemainder(dividingBy: 1)
 
-            self.lastTime = time
+            defer { lastTime = time }
 
             return self.wave(self.phase)
         }
