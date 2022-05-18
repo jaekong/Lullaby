@@ -1,7 +1,10 @@
+import Foundation
+
 public typealias DSPFunction = (Time) -> (Sample)
 
 public struct Signal {
     public var function: DSPFunction
+    fileprivate let uuid = UUID()
     
     public init(_ function: @escaping DSPFunction) {
         self.function = function
@@ -13,15 +16,45 @@ public struct Signal {
     }
 }
 
+extension Signal: Equatable {
+    public static func == (lhs: Signal, rhs: Signal) -> Bool {
+        withUnsafePointer(to: lhs.function) { lhsPointer in
+            withUnsafePointer(to: rhs.function) { rhsPointer in
+                return lhsPointer == rhsPointer
+            }
+        }
+    }
+}
+
+extension Signal: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        uuid.hash(into: &hasher)
+    }
+}
+
+extension Collection where Element == Signal {
+    public func callAsFunction(_ time: Time) -> Sample {
+        reduce(0) {
+            $0 + $1.callAsFunction(time)
+        }
+    }
+    
+    public var output: Signal {
+        return Signal {
+            self.callAsFunction($0)
+        }
+    }
+}
+
 extension Signal: ExpressibleByFloatLiteral {
     public init(floatLiteral value: FloatLiteralType) {
-        self = .constant(Sample(value))
+        self.function = { _ in return Sample(value) }
     }
 }
 
 extension Signal: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: IntegerLiteralType) {
-        self = .constant(Sample(value))
+        self.function = { _ in return Sample(value) }
     }
 }
 
