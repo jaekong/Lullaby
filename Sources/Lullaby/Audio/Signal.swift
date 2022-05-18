@@ -30,6 +30,10 @@ public extension Signal {
         return Signal { time in lhs(time) + rhs(time) }
     }
     
+    static func -(lhs: Signal, rhs: Signal) -> Signal {
+        return Signal { time in lhs(time) - rhs(time) }
+    }
+    
     static func *(lhs: Signal, rhs: Signal) -> Signal {
         return Signal { time in lhs(time) * rhs(time) }
     }
