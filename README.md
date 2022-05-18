@@ -85,7 +85,6 @@ while !task.isCancelled {}
 
 ## Future Plans
 
-- Polyphonic synthesiser system, using Oscillators and Envelopes.
 - Triggers subscribing to external events - key presses, MIDI, etcs.
 - Musical Composition DSL system
   - Writing musical pieces through custom DSL.
