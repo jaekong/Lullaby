@@ -1,9 +1,8 @@
 # Lullaby
 
 ![For Swift 5.5+](https://img.shields.io/badge/swift-5.5%2B-orange?style=flat-square)
-![Build Status](https://img.shields.io/github/workflow/status/jtodaone/Lullaby/build?style=flat-square)  
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjtodaone%2FLullaby%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/jtodaone/Lullaby)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjtodaone%2FLullaby%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/jtodaone/Lullaby)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjaekong%2FLullaby%2Fbadge%3Ftype%3Dswift-versions&style=flat-square)](https://swiftpackageindex.com/jaekong/Lullaby)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fjaekong%2FLullaby%2Fbadge%3Ftype%3Dplatforms&style=flat-square)](https://swiftpackageindex.com/jaekong/Lullaby)
 
 Lullaby is an audio synthesis framework for Swift that supports both macOS and Linux! It was inspired by other audio environments like FAUST, SuperCollider, Max and an article "Functional Signal Processing in Swift".
 
