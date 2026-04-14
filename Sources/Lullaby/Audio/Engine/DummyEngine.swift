@@ -17,8 +17,8 @@ final public class DummyEngine: LBEngine {
         
     }
     
-    public func setOutput(to signal: Signal) {
-        self.output = signal
+    public func setOutput(to signal: Outputting) {
+        self.output = signal.output
     }
     
     public func prepare() throws {
@@ -53,9 +53,9 @@ final public class DummyEngine: LBEngine {
         audioTask?.cancel()
     }
     
-    public static func playTest(of signal: Signal, for seconds: Double) async throws {
+    public static func playTest(of signal: Outputting, for seconds: Double) async throws {
         let engine = try await Self()
-        engine.setOutput(to: signal)
+        engine.setOutput(to: signal.output)
         try engine.prepare()
         try engine.start()
         await Task.sleep(seconds: seconds)

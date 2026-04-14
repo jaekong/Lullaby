@@ -15,8 +15,8 @@ final public class MiniAudioEngine: LBEngine {
     public init() async throws {
     }
 
-    public func setOutput(to signal: Signal) {
-        self.output = signal
+    public func setOutput(to signal: any Outputting) {
+        self.output = signal.output
     }
 
     public func prepare() throws {
@@ -52,9 +52,9 @@ final public class MiniAudioEngine: LBEngine {
         }
     }
     
-    public static func playTest(of signal: Signal = sine(frequency: 440.0), for seconds: Double = 1) async throws {
+    public static func playTest(of signal: Outputting = sine(frequency: 440.0), for seconds: Double = 1) async throws {
         let engine = try await Self()
-        engine.setOutput(to: signal)
+        engine.setOutput(to: signal.output)
         try engine.prepare()
         try engine.start()
         await Task.sleep(seconds: seconds)

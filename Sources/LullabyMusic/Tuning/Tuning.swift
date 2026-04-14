@@ -221,8 +221,8 @@ public struct Tuning: Codable {
     }
 }
 
-extension Tuning {
-    public func noteToFrequency(note: Pitch) -> Frequency {
+public extension Tuning {
+    func noteToFrequency(note: Pitch) -> Frequency {
         let octave = floor(note)
         let pitchClass = note - octave
 
@@ -235,7 +235,7 @@ extension Tuning {
         return (standardFrequency * Double(closestNote)) * pow(2, octave)
     }
     
-    public func closestNoteInTune(note: Pitch) -> Pitch {
+    func closestNoteInTune(note: Pitch) -> Pitch {
         let octave = floor(note)
         let pitchClass = note - octave
 
@@ -249,11 +249,13 @@ extension Tuning {
     }
 }
 
-/// Standard 12TET at 440Hz tuning.
-public let twelveToneEqualTemperamentTuning = Tuning(toneCount: 12, standardFrequency: 440)
+public extension Tuning {
+    /// Standard 12TET at 440Hz tuning.
+    static let twelveToneEqualTemperament = Tuning(toneCount: 12, standardFrequency: 440)
+}
 
-extension Double {
-    public init(_ other: Ratio) {
+public extension Double {
+    init(_ other: Ratio) {
         self.init(other.decimalValue)
     }
 }

@@ -2,22 +2,29 @@ import Foundation
 import Collections
 
 public struct SynthEvent {
+    public init(frequency: Signal, duration: Time) {
+        self.frequency = frequency
+        self.duration = duration
+    }
+    
     public let frequency: Signal
     public let duration: Time
 }
 
-public actor MonophonicSynth {
+public class MonophonicSynth: Outputting {
     private var oscillator: Oscillator
     private var envelope: EnvelopeGenerator
     
     public var frequency: Signal = 0
     
     public var output: Signal {
-        return oscillator.output * envelope.output
+        return Signal {
+            self.mixedSignal($0)
+        }
     }
     
-    public init(wave: @escaping Wave, envelope: Envelope) {
-        self.oscillator = Oscillator(wave: wave, frequency: frequency, phase: 0)
+    public init(oscillator: Oscillator, envelope: Envelope) {
+        self.oscillator = oscillator
         self.envelope = EnvelopeGenerator(envelope: envelope)
     }
     
@@ -27,44 +34,68 @@ public actor MonophonicSynth {
         await Task.sleep(seconds: self.envelope.envelope.release)
     }
     
+    private func mixedSignal(_ time: Time) -> Sample {
+        oscillator.output(time) * envelope.output(time)
+    }
+    
     public func play(event: SynthEvent) {
         Task {
             await self.play(event: event)
         }
     }
+    
+    deinit {
+        print("deinit monosynth \(output.hashValue)")
+    }
 }
 
+
 public actor Synth {
-//    private var synths: Deque<MonophonicSynth> = []
+    private var synths: [MonophonicSynth] = []
     
-    private var wave: Wave
-    private var envelope: Envelope
+    private let oscillator: Oscillator
+    private let envelope: Envelope
     
-    public var signals: [Signal] = []
+//    public var signals: [Signal] = []
     public var output: Signal {
         return Signal {
             self.mixedSignal($0)
         }
     }
     
+    private var lastIndex: Int = 0
+    
     public var currentPolyphonyCount: Signal = 0
     
-    public init(wave: @escaping Wave, envelope: Envelope) {
-        self.wave = wave
+    init(oscillator: Oscillator, envelope: Envelope, voiceCount: Int = 8) async {
+        self.oscillator = oscillator
         self.envelope = envelope
+        self.synths = (0..<voiceCount).map { _ in 
+            MonophonicSynth(oscillator: oscillator, envelope: self.envelope)
+        }
+        
+        print(voiceCount, "voices")
     }
     
     public func play(event: SynthEvent) async {
-        let synth = MonophonicSynth(wave: wave, envelope: envelope)
-        let signal = await synth.output
+        let index = self.lastIndex
         
-        signals.append(signal)
-        currentPolyphonyCount = currentPolyphonyCount + 1
+        Task {
+            print("voice \(index) playing")
+        }
         
-        await synth.play(event: event)
-
-        signals.removeAll { $0 == signal }
-        currentPolyphonyCount = currentPolyphonyCount - 1
+        let playTask = Task {
+            await synths[index].play(event: event)
+        }
+        
+        if lastIndex >= synths.count - 1 { lastIndex = 0 }
+        else { lastIndex += 1 }
+        
+        await playTask.value
+        
+        Task {
+            print("voice \(index) stop")
+        }
     }
     
     public func play(events: [SynthEvent]) async {
@@ -78,7 +109,9 @@ public actor Synth {
     }
     
     private func mixedSignal(_ time: Time) -> Sample {
-        return signals(time)
+        return synths.reduce(0) {
+            $0 + $1.output(time)
+        }
     }
     
     nonisolated public func play(event: SynthEvent) {

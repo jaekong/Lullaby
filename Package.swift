@@ -66,7 +66,6 @@ let package = Package(
             name: "LullabyTests",
             dependencies: [
                 .target(name: "Lullaby"),
-//                .target(name: "LullabySoundIOEngine"),
                 .target(name: "LullabyMiniAudioEngine")
             ])
     ]

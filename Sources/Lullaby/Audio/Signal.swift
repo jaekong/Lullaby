@@ -2,7 +2,25 @@ import Foundation
 
 public typealias DSPFunction = (Time) -> (Sample)
 
-public struct Signal {
+public protocol Inputable {
+    var input: Signal { get set }
+}
+
+public protocol Outputting {
+    var output: Signal { get }
+}
+
+extension Outputting {
+    static func *(lhs: Self, rhs: Self) -> OutputNode {
+        OutputNode(output: lhs.output * rhs.output)
+    }
+}
+
+public struct OutputNode: Outputting {
+    public var output: Signal
+}
+
+public struct Signal: Outputting {
     public var function: DSPFunction
     fileprivate let uuid = UUID()
     
@@ -14,6 +32,8 @@ public struct Signal {
     public func callAsFunction(_ time: Time) -> Sample {
         function(time)
     }
+    
+    public var output: Signal { self }
 }
 
 extension Signal: Equatable {
@@ -36,6 +56,20 @@ extension Collection where Element == Signal {
     public func callAsFunction(_ time: Time) -> Sample {
         reduce(0) {
             $0 + $1.callAsFunction(time)
+        }
+    }
+    
+    public var output: Signal {
+        return Signal {
+            self.callAsFunction($0)
+        }
+    }
+}
+
+extension Collection where Element == Outputting {
+    public func callAsFunction(_ time: Time) -> Sample {
+        reduce(0) {
+            $0 + $1.output.callAsFunction(time)
         }
     }
     

@@ -1,13 +1,15 @@
 import Foundation
 
-public func sine(frequency: Signal, phase: Phase = 0) -> Signal {
-    return Oscillator(wave: BasicWaves.sine, frequency: frequency, phase: phase).output
-}
+public enum BasicOscillators {
+    static public func sine(frequency: Signal, phase: Phase = 0) -> Oscillator {
+        return Oscillator(wave: BasicWaves.sine, frequency: frequency, phase: phase)
+    }
 
-public func triangle(frequency: Signal, phase: Phase = 0) -> Signal {
-    return Oscillator(wave: BasicWaves.triangle, frequency: frequency, phase: phase).output
-}
+    static public func triangle(frequency: Signal, phase: Phase = 0) -> Oscillator {
+        return Oscillator(wave: BasicWaves.triangle, frequency: frequency, phase: phase)
+    }
 
-public func square(frequency: Signal, phase: Phase = 0) -> Signal {
-    return Oscillator(wave: BasicWaves.square, frequency: frequency, phase: phase).output
+    static public func square(frequency: Signal, phase: Phase = 0) -> Oscillator {
+        return Oscillator(wave: BasicWaves.square, frequency: frequency, phase: phase)
+    }
 }
